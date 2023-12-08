@@ -1,0 +1,6 @@
+pandas
+python-decouple
+fastapi
+python-multipart
+uvicorn
+SQLAlchemy
