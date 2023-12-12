@@ -33,7 +33,6 @@ class SqlPostgresClient(con.SqlConnexionClient):
 
     def __init__(self):
         super().__init__()
-
         self.user = config("DB_USER")
         self.password = config("DB_PASSWORD")
         self.host = config("DB_HOST")
@@ -44,23 +43,13 @@ class SqlPostgresClient(con.SqlConnexionClient):
         self.autocommit = config("DB_AUTOCOMMIT", cast=bool)
         self.db = f"{self.user}:{self.password}@{self.host}:{self.port}/{self.db_name}"
 
-    #   print("en postgresCli")
-    #    print(f"{self.dialect}://{self.db}")
-
     def _get_engine(self):
         db_uri = f"{self.dialect}://{self.db}"
-
         if not self.engine:
             self.engine = create_engine(
-                db_uri,
-                connect_args={"options": "-csearch_path={}".format(self.schema)},
+                db_uri, connect_args={"options": "-csearch_path={}".format(self.schema)}
             )
-
-        # self.engine.execution_options(autocommit=True)
         return self.engine
-
-    def _connect(self):
-        return self._get_engine().connect()
 
     def table_exist(self, tableName, connection=None, **kwargs):
         if connection is None:
@@ -79,6 +68,6 @@ class SqlPostgresClient(con.SqlConnexionClient):
         return columns_table
 
 
-# if __name__ == "__main__":
-#   connect_cli = SqlPostgresClient()
-#  print(connect_cli.to_frame("select * from avg_delays"))
+if __name__ == "__main__":
+    connect_cli = SqlPostgresClient()
+    print(return_table_columns("jobs"))

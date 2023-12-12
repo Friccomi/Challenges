@@ -17,6 +17,7 @@ from sqlalchemy import (
     String,
     Float,
     exc,
+    text,
 )
 from libraries.sqlPostgresCli import SqlPostgresClient
 
@@ -24,13 +25,17 @@ from libraries.sqlPostgresCli import SqlPostgresClient
 
 
 SCHEMA = config("DB_SCHEMA")
-# sql_cli = SqlPostgresClient()
+sql_cli = SqlPostgresClient()
 path = config("PATH_APP")
 prefix = config("PATH_FILES")
 
 
+sql_cli = SqlPostgresClient()
+
+
 def _save_in_DB(df1, SQL_TABLE):
     print("Antes de Grabar")
+    print(df1)
     try:
         sql_cli.insert_from_frame(df1, SQL_TABLE)
         print(f"Inserted {len(df1)} records")
@@ -40,14 +45,18 @@ def _save_in_DB(df1, SQL_TABLE):
         raise
         with open("readme.txt", "w") as f:
             f.write(str(ee))
-
+    except Exception as err:
+        print(err)
+        raise
 
 def limpiar_tablas(tablas):  # porceso 1.2
     try:  # if table pre-exist, delete all data
-        sql_cli.execute(f"truncate table {tablas}")
+        sql_cli.execute(f"truncate table {SCHEMA}.{tablas}")
 
     except sqlalchemy.exc.IntegrityError as error:
         print(str(error.orig) + " for parameters" + str(error.params))
+    except Exception as err:
+        print(err)
 
 
 def save_df(origin, bucket, prefix, filename, df_final, type):
