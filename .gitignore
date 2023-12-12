@@ -11,4 +11,9 @@ challenges/requirements (copia).txt'
 challenges/tox.ini
 challenges/'uploadFiles copy.py'
 challenges/libraries/__pycache__/
+challenges/Aux/
+challenges/tox.ini
+challenges/'uploadFiles copy.py'
+challenges/main_ejemplo.py
+challenges/main_ant.py
 
