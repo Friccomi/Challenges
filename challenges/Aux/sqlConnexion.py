@@ -48,9 +48,7 @@ class SqlConnexionClient:
         if connection is None:
             connection = self._connect()
             # print(sql)
-        result = connection.execute(text(sql))
-
-        return result
+        return connection.execute(text(sql))
 
     def insert_from_frame(self, df, table, if_exists="append", index=False, **kwargs):
         connection = self._connect()
@@ -69,10 +67,8 @@ class SqlConnexionClient:
             df = pd.DataFrame()
         return df
 
+    def table_exist(self, tableName, **kwargs):
+        pass
 
-def table_exist(self, tableName, connection=None, **kwargs):
-    pass
-
-
-def return_table_columns(self, tableName, **kwargs):
-    pass
+    def return_table_columns(self, tableName, **kwargs):
+        pass

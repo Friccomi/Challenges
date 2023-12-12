@@ -1,6 +1,7 @@
-pandas
-python-decouple
-fastapi
-python-multipart
-uvicorn
-SQLAlchemy
+pandas==1.5.3
+python-decouple==3.8
+fastapi==0.104.1
+python-multipart==0.0.6
+uvicorn==0.24.0.post1
+SQLAlchemy==1.4.16
+psycopg2-binary==2.9.9
