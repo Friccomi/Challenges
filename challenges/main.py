@@ -25,13 +25,28 @@ prefix_2 = config("PATH_FILES2")
 sql_cli = SqlPostgresClient()
 
 app = FastAPI()
+prefix1 = f"{path}{prefix}"
+prefix2 = f"{path}{prefix_2}"
+# prefix1 = f"/home/flor/GO/filesGo/"
+# prefix2 = f"/home/flor/GO/filesGoAux/"
+
+
+@app.delete("/")
+def delete_tables():
+    tableNames = sql_cli.return_table_names()
+    for tableName in tableNames:
+        try:
+            grl.limpiar_tablas(tableName)
+        except Exception as error:
+            raise HTTPException(
+                status_code=404, detail=f"Unable to delete table {tableName}: {error}"
+            )
+    return {"ok": True}
 
 
 @app.post("/upload")
 def upload(files: List[UploadFile] = File(...)):
     sigue = "s"
-    prefix1 = f'{os.getenv("HOME")}{prefix}'
-    prefix2 = f'{os.getenv("HOME")}{prefix_2}'
     limpiarDirectorio(prefix1)
     limpiarDirectorio(prefix2)
     for file in files:
@@ -47,7 +62,7 @@ def upload(files: List[UploadFile] = File(...)):
             HTTPException(421, f"{file.filename} is not a csv file")
     if sigue == "s":
         try:
-            mensaje = uploadToDB(prefix1, prefix2, df_table)
+            mensaje = uploadToDB(prefix1, prefix2)
             if mensaje != "":
                 raise
         except Exception:
@@ -62,29 +77,23 @@ def limpiarDirectorio(prefix_v):
         os.remove(os.path.join(prefix_v, f))
 
 
-def uploadToDB(prefix_v, prefix_v2, df_table):
+def uploadToDB(prefix_v, prefix_v2):
     filelist = [f for f in os.listdir(prefix_v)]
-    # disable_constraints()
     for f in filelist:
         fileName = os.path.join(prefix_v, f)
+        df_table = grl.obtain_file(origin, prefix_v2, fileName, bucket_name_s3, "csv")
         tableName = f.split(".csv")[0]
-        print(tableName)
         try:
             if not sql_cli.table_exist(tableName):
-                #  enable_contraints()
                 return "is not a valida table"
         except Exception as error:
-            # enable_contraints()
             return error
         try:
             columns_table = sql_cli.return_table_columns(tableName)
             df_col_tab = pd.DataFrame(columns_table)
         except Exception as error:
-            # enable_contraints()
             return error
         header = []
-        print(header)
-        print()
         for c in columns_table:
             header.append(c["name"])
 
@@ -92,14 +101,11 @@ def uploadToDB(prefix_v, prefix_v2, df_table):
             np.row_stack([df_table.columns, df_table.values]), columns=header
         )
         df_table = df_table.drop([0], axis=0)
-        print(df_table)
         grl.save_df(
             destiny, bucket_name_s3, prefix_v2, f"{tableName}_aux.csv", df_table, "csv"
         )
 
         for c in columns_table:
-            print(c["name"])
-            print(c["type"])
             columName = c["name"]
             if str(c["type"]) == "INTEGER":
                 df_table[columName] = pd.to_numeric(df_table[columName])
@@ -107,50 +113,17 @@ def uploadToDB(prefix_v, prefix_v2, df_table):
                 df_table[columName] = pd.to_datetime(df_table[columName])
         try:
             grl.limpiar_tablas(tableName)
-            # grl._save_in_DB(df_table, tableName)
-
             batch_size = 1000
             for batch_number, batch_df in df_table.groupby(
                 np.arange(len(df_table)) // batch_size
             ):
                 grl._save_in_DB(batch_df, tableName)
         except Exception as error:
-            # enable_contraints()
             mensaje = error
             return mensaje
 
-    # enable_contraints()
     return ""
-
-
-def enable_contraints():  # the correct to do is SET session_replication_role = 'replica'; but is not working
-    sql_cli.execute(
-        "ALTER TABLE challenge.hired_employees ADD CONSTRAINT hired_employees_fk FOREIGN KEY (department_id) REFERENCES challenge.departments(id); ALTER TABLE challenge.hired_employees ADD CONSTRAINT hired_employees_fk_1 FOREIGN KEY (job_id) REFERENCES challenge.jobs(id); commit;"
-    )
-
-
-def disable_constraints():  # the correct to do is SET session_replication_role = 'replica'; but is not working
-    sql_cli.execute(
-        "ALTER TABLE challenge.hired_employees DROP CONSTRAINT hired_employees_fk; ALTER TABLE challenge.hired_employees DROP CONSTRAINT hired_employees_fk_1;"
-    )
 
 
 if __name__ == "__main__":
     uvicorn.run("main:app", port=5000, log_level="info")
-    # in the browser type  -->  http://127.0.0.1:5000/docs
-    # sql_cli.table_exist("jobs")
-    # connect_cli = SqlPostgresClient()
-    #  print(connect_cli.to_frame(text("select * from challenge.jobs")))
-    # df = sql_cli.to_frame(f"select * from challenge.jobs")
-    #  print(df)
-# prefix1 = f'{os.getenv("HOME")}{prefix}'
-# prefix2 = f'{os.getenv("HOME")}{prefix_2}'
-# df = grl.obtain_file(
-#     origin, prefix2, "hired_employees_aux.csv", bucket_name_s3, "csv"
-# )
-# grl.limpiar_tablas(""hired_employees_aux")
-# grl._save_in_DB(df, "jobs")
-#  mensaje = uploadToDB(prefix1, prefix2, df)
-#   print(mensaje)
-#  columns_table = sql_cli.return_table_columns("jobs")
-# grl._save_in_DB(df, "jobs")
