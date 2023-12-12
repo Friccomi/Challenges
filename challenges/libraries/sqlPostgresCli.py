@@ -1,5 +1,3 @@
-import pandas as pd
-
 from sqlalchemy import create_engine, inspect
 from decouple import config
 
@@ -77,6 +75,12 @@ class SqlPostgresClient(con.SqlConnexionClient):
         insp = inspect(engine)
         columns_table = insp.get_columns(tableName, self.schema)  # schema is optional
         return columns_table
+
+    def return_table_names(self, **kwargs):
+        engine = self._get_engine()
+        insp = inspect(engine)
+        tableNames = insp.get_table_names(schema=self.schema)  # schema is optional
+        return tableNames
 
 
 # if __name__ == "__main__":

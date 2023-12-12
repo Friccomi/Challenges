@@ -49,9 +49,10 @@ def _save_in_DB(df1, SQL_TABLE):
         print(err)
         raise
 
+
 def limpiar_tablas(tablas):  # porceso 1.2
     try:  # if table pre-exist, delete all data
-        sql_cli.execute(f"truncate table {SCHEMA}.{tablas}")
+        sql_cli.execute(f"delete from {SCHEMA}.{tablas}")
 
     except sqlalchemy.exc.IntegrityError as error:
         print(str(error.orig) + " for parameters" + str(error.params))

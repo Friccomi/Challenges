@@ -16,4 +16,5 @@ challenges/tox.ini
 challenges/uploadFiles copy.py
 challenges/main_ejemplo.py
 challenges/Aux
+challenges/.env_local
 

@@ -27,7 +27,6 @@ services:
            - ./scripts:/scripts
              # copy the sql script to create tables
            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-       #mac_address: 02:42:c0:a8:84:22
        networks:
           proj_net:
             ipv4_address: 177.10.10.10
@@ -39,7 +38,8 @@ services:
        environment:
           DEBUG: 1
        volumes:
-        - ./filesGo:/filesGo
+        - ./filesGo:/code/filesGo
+        - ./filesGoAux:/code/filesGoAux
         - ./challenges:/code/app
        ports:
         - 8008:8000
