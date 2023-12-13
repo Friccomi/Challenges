@@ -16,7 +16,6 @@ from datetime import datetime
 from datetime import timezone
 import libraries._general as grl
 from libraries.sqlPostgresCli import SqlPostgresClient
-import requests
 
 
 s3, bucket_name_s3, region, destiny, origin = grl.obtain_buckets_data()
