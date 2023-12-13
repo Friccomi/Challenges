@@ -24,6 +24,7 @@
 	   		IP:177.10.10.10
 	   		Port: 5432
 	   		Accesible from the local net to be able to inspect tables.
+	   		Tables are created when DB starts for first time
 	   		
 	   	- Linux Ubuntu, python, FastApi
 	   		IP:177.10.10.20
