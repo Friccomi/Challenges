@@ -1,8 +1,7 @@
 import codecs
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from typing import List
 import uvicorn
 import pandas as pd
