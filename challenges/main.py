@@ -1,5 +1,8 @@
 import codecs
 from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request
 from typing import List
 import uvicorn
 import pandas as pd
@@ -14,6 +17,8 @@ from datetime import datetime
 from datetime import timezone
 import libraries._general as grl
 from libraries.sqlPostgresCli import SqlPostgresClient
+import requests
+
 
 s3, bucket_name_s3, region, destiny, origin = grl.obtain_buckets_data()
 
@@ -123,6 +128,22 @@ def uploadToDB(prefix_v, prefix_v2):
             return mensaje
 
     return ""
+
+
+@app.get("/report2", response_class=HTMLResponse)
+def report2():
+    sentence = "select  id, department,  hired from( \
+select d.id, d.department, count(*) as hired  from challenge.departments d left join challenge.hired_employees h \
+on d.id =h.department_id \
+group by d.id, d.department) a \
+where hired >(select percentile_cont(0.50) within group (order by b.hired)from( \
+select d.id, d.department, count(*) as hired  from challenge.departments d left join challenge.hired_employees h \
+on d.id =h.department_id \
+group by d.id, d.department) b) \
+order by 3 desc"
+    df = sql_cli.to_frame(sentence)
+    payload = df.to_html()
+    return HTMLResponse(content=payload, status_code=200)
 
 
 if __name__ == "__main__":
